@@ -14,7 +14,7 @@ A single-page CV website (HTML) with a downloadable PDF.
 - **preview.png** — README preview image.
 
 ## 🔧 How to Publish (GitHub Pages)
-1. Upload `MyWebPageDeskTop.html` and `Faisal_AlMass_CV.pdf` to the repo root (branch: `main`).
+1. Upload `MyWebPageDeskTop.html` and `Faisal_AlMass_CV.pdf` and `preview.png` to the repo root (branch: `main`).
 2. Go to **Settings → Pages** → Select `Branch: main` and `/(root)` → **Save**.
 3. Your site will be live at:  
    `https://username.github.io/my-cv-page/`
@@ -30,3 +30,4 @@ A single-page CV website (HTML) with a downloadable PDF.
 
 ## 📜 License
 Personal use only. Do not modify or redistribute without permission.
+

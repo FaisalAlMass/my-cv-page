@@ -2,7 +2,7 @@
 
 A single-page CV website (HTML) with a downloadable PDF.
 
-![Preview](preview.png)
+![Preview](preview_updated.png)
 
 ## 🌐 Live Demo
 [**Open the site**](https://FaisalAlMass.github.io/my-cv-page/)  

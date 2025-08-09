@@ -6,7 +6,6 @@ A single-page CV website (HTML) with a downloadable PDF.
 
 ## 🌐 Live Demo
 [**Open the site**](https://FaisalAlMass.github.io/my-cv-page/)  
-*(Replace `username` with your GitHub username.)*
 
 ## 📂 Files
 - **MyWebPageDeskTop.html** — Main webpage.

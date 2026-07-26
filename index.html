@@ -921,6 +921,7 @@
   var root = document.documentElement;
   function isEn(){ return root.getAttribute('lang') === 'en'; }
   var EMAIL = 'fsm333@gmail.com';
+  var FORM_ENDPOINT = 'https://formspree.io/f/mlgqagqb';
 
   var state = { svc:'intro', dur:20, svcName:{ar:'مكالمة تعريفية',en:'Intro call'}, day:null, dayObj:null, time:null };
 
@@ -1050,23 +1051,43 @@
     var timeStr = fmtSlot(state.time);
     var svcStr = isEn()? state.svcName.en : state.svcName.ar;
 
-    // prefilled email to Faisal
     var subj = (isEn()?'New booking: ':'حجز جديد: ')+svcStr+' — '+name;
     var lines = isEn()
       ? ['New consultation booking','','Service: '+svcStr+' ('+state.dur+' min)','Day: '+dayStr,'Time: '+timeStr,'Name: '+name,'Email: '+email,'Phone: '+(phone||'-'),'Topic: '+(note||'-')]
       : ['حجز استشارة جديد','','الجلسة: '+svcStr+' ('+state.dur+' دقيقة)','اليوم: '+dayStr,'الوقت: '+timeStr,'الاسم: '+name,'البريد: '+email,'الجوال: '+(phone||'-'),'الموضوع: '+(note||'-')];
+    // mailto kept as a manual fallback
     var mailto = 'mailto:'+EMAIL+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(lines.join('\n'));
 
-    renderSuccess({ name:name, dayStr:dayStr, timeStr:timeStr, svcStr:svcStr, mailto:mailto, ics:buildICS(start) });
-    // fire the email to deliver the booking
-    try { window.location.href = mailto; } catch(e){}
+    // disable button + show sending state
+    var btn = document.getElementById('confirmBtn');
+    btn.disabled = true; btn.textContent = isEn()?'Sending…':'جارٍ الإرسال…';
+
+    // send the booking automatically to Formspree so it reaches the inbox
+    var payload = {
+      _subject: subj,
+      booking_session: svcStr, booking_duration: state.dur+(isEn()?' min':' دقيقة'),
+      booking_day: dayStr, booking_time: timeStr,
+      name: name, email: email, phone: phone||'-', topic: note||'-'
+    };
+    fetch(FORM_ENDPOINT, {
+      method:'POST', headers:{ 'Accept':'application/json', 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(r){
+      renderSuccess({ name:name, dayStr:dayStr, timeStr:timeStr, svcStr:svcStr, mailto:mailto, ics:buildICS(start), sent:r.ok });
+    }).catch(function(){
+      renderSuccess({ name:name, dayStr:dayStr, timeStr:timeStr, svcStr:svcStr, mailto:mailto, ics:buildICS(start), sent:false });
+    });
   });
 
   function renderSuccess(o){
-    var okTitle = isEn()?'Your booking is set':'تم تجهيز حجزك';
-    var okText  = isEn()
-      ? 'A confirmation email opened addressed to Faisal. Add the session to your calendar below.'
-      : 'فُتحت رسالة تأكيد موجّهة إلى فيصل. أضِف الجلسة إلى تقويمك من الأزرار أدناه.';
+    var okTitle = isEn()?'Your booking is confirmed':'تم تأكيد حجزك';
+    var okText  = o.sent
+      ? (isEn()
+          ? 'Your booking has been sent to Faisal. You can add the session to your calendar below.'
+          : 'تم إرسال حجزك إلى فيصل. تقدر تضيف الجلسة إلى تقويمك من الأزرار أدناه.')
+      : (isEn()
+          ? 'We couldn\u2019t send automatically. Please tap \u201CSend email\u201D below to deliver your booking.'
+          : 'تعذّر الإرسال التلقائي. فضلاً اضغط \u201Cإرسال بالبريد\u201D أدناه لإيصال حجزك.');
     var m = document.getElementById('book-main');
     m.innerHTML =
       '<div class="bk-wrap"><div class="wrap"><div class="bk-step"><div class="success">'
@@ -1080,7 +1101,7 @@
       + '</div>'
       + '<div class="success-actions">'
       +   '<a class="btn btn-primary" href="'+o.ics+'" download="consultation.ics">'+(isEn()?'Add to calendar':'أضِف إلى التقويم')+'</a>'
-      +   '<a class="btn btn-ghost" href="'+o.mailto+'">'+(isEn()?'Resend email':'إعادة إرسال التأكيد')+'</a>'
+      +   '<a class="btn btn-ghost" href="'+o.mailto+'">'+(isEn()?'Send email':'إرسال بالبريد')+'</a>'
       +   '<a class="btn btn-ghost" href="#book" onclick="location.hash=\'book\';location.reload();return false;">'+(isEn()?'Book another':'حجز آخر')+'</a>'
       + '</div></div></div></div></div>';
   }
